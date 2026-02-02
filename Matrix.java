@@ -57,14 +57,41 @@ public class Matrix {
         return matrixString;
     }
 
-    // Takes two matrices and makes a new one from Gaussian Elimination
+    // Takes two matrices
     public double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
         double[][] product = new double[1][1];
         return product;
     }
 
+    // Reduces the matrix to reduced row echelon form using Guassian Elimination
     public void reduce() {
-        interchangeRows(0, 0);
+        boolean matrixIsZero = false;
+        for (int row = 0; row < numberOfRows; row++) {
+            for (int column = 0; column < numberOfColumns; column++) {
+                double value = matrix[row][column];
+                // Interchange with first non-zero row (if possible)
+                while (value == 0 && !matrixIsZero) {
+                    int rowCheck = 0;
+                    int newRow = row; // default value, should change
+                    while (newRow == row && rowCheck < numberOfRows) {
+                        if (rowCheck != row) {
+                            if (matrix[rowCheck][column] != 0) {
+                                newRow = rowCheck;
+                            }
+                        }
+                        rowCheck++;
+                    }
+                    if (newRow != row)
+                        interchangeRows(row,newRow);
+                    else if (column < numberOfColumns - 1) // if we aren't on the last column
+                        column++;
+                    else
+                        matrixIsZero = true; // all matrix values are zero
+                    value = matrix[row][column];
+                }
+                for ()
+            }
+        }
     }
 
     public void interchangeRows(int firstRow, int secondRow) {
