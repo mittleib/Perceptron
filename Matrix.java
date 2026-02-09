@@ -1,9 +1,24 @@
 import java.util.Scanner;
 
 public class Matrix {
+    private final String RESET = "\u001B[0m";
+    private final String RED_BACKGROUND = "\u001B[41m";
+
     private int numberOfRows;
     private int numberOfColumns;
     private double[][] matrix;
+
+    public Matrix() {
+        numberOfRows = 0;
+        numberOfColumns = 0;
+        createMatrix();
+    }
+
+    public Matrix(int totalRows, int totalColumns) {
+        numberOfRows = totalRows;
+        numberOfColumns = totalColumns;
+        createMatrix();
+    }
 
     public int getNumberOfRows() {
         return numberOfRows;
@@ -21,7 +36,7 @@ public class Matrix {
         numberOfColumns = number;
     }
 
-    public void createMatrix() {
+    private void createMatrix() {
         Scanner input = new Scanner(System.in);
         matrix = new double[numberOfRows][numberOfColumns];
         for (int rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
@@ -44,6 +59,7 @@ public class Matrix {
     }
 
     // Returns a print-ready String version of the matrix
+    @Override
     public String toString() {
         String matrixString = "";
         if (matrixIsSafe()) {
@@ -65,31 +81,57 @@ public class Matrix {
 
     // Reduces the matrix to reduced row echelon form using Guassian Elimination
     public void reduce() {
-        boolean matrixIsZero = false;
-        for (int row = 0; row < numberOfRows; row++) {
-            for (int column = 0; column < numberOfColumns; column++) {
-                double value = matrix[row][column];
-                // Interchange with first non-zero row (if possible)
-                while (value == 0 && !matrixIsZero) {
-                    int rowCheck = 0;
-                    int newRow = row; // default value, should change
-                    while (newRow == row && rowCheck < numberOfRows) {
-                        if (rowCheck != row) {
-                            if (matrix[rowCheck][column] != 0) {
-                                newRow = rowCheck;
-                            }
-                        }
-                        rowCheck++;
+        boolean matrixIsDone = false;
+        int row = 0;
+        int column = 0;
+        while (!matrixIsDone) {
+            // Define "value"
+            double value = matrix[row][column];
+
+            // Step 1: Interchange row with first non-zero row if "value" == 0
+            while (value == 0 && !matrixIsDone) {
+                int rowCheck = row + 1;
+                int newRow = row; // default value, should change
+                while (newRow == row && rowCheck < numberOfRows) {
+                    if (matrix[rowCheck][column] != 0) {
+                        newRow = rowCheck;
                     }
-                    if (newRow != row)
-                        interchangeRows(row,newRow);
-                    else if (column < numberOfColumns - 1) // if we aren't on the last column
-                        column++;
-                    else
-                        matrixIsZero = true; // all matrix values are zero
-                    value = matrix[row][column];
+                    rowCheck++;
                 }
-                for ()
+                if (newRow != row)
+                    interchangeRows(row,newRow);
+                else if (column < numberOfColumns - 1) // if we aren't on the last column
+                    column++;
+                else
+                    matrixIsDone = true;
+                value = matrix[row][column];
+            }
+            if (!matrixIsDone) {
+                // Step 2: Multiply row values by same coefficient to make "value" 1
+                if (value != 1 && value != 0) {
+                    double coefficient = 1 / value;
+                    for (int columnCheck = column; columnCheck < numberOfColumns; columnCheck++) {
+                        matrix[row][columnCheck] = matrix[row][columnCheck] * coefficient;
+                    }
+                }
+
+                // Step 3: Make cooresponding values of other rows 0 around "value"
+                //         by subtracting multiples of this row's values to other rows' values
+                for (int rowCheck = 0; rowCheck < numberOfRows; rowCheck++) {
+                    if (rowCheck != row) {
+                        double coefficient = matrix[rowCheck][column] / matrix[row][column];
+                        for (int columnCheck = column; columnCheck < numberOfColumns; columnCheck++) {
+                            double thisRowValue = matrix[row][columnCheck];
+                            double otherRowValue = matrix[rowCheck][columnCheck];
+                            matrix[rowCheck][columnCheck] = otherRowValue - coefficient * thisRowValue;
+                        }
+                    }
+                }
+
+                row++;
+                column++;
+                if (row >= numberOfRows || column >= numberOfColumns)
+                    matrixIsDone = true;
             }
         }
     }
@@ -104,20 +146,28 @@ public class Matrix {
             System.out.println("Error: can't interchange, exceeds row limit.");
     }
 
+    public void solve() {
+        // Solutions:
+        // {1,1,0,6,0} 1x1 + 1x2 + 0x3 + 6x4 + 0x5
+        // {0,0,1,2,0} 0x1 + 0x2 + 1x3 + 2x4 + 0x5
+        // {0,0,0,1,1} 0x1 + 0x2 + 0x3 + 1x4 + 1x5
+        // {0,0,0,0,0} 0x1 + 0x2 + 0x3 + 0x4 + 0x5
+    }
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         
         System.out.println("This is a program to calculate matrix math.");
 
-        Matrix matrix1 = new Matrix();
+        //Matrix matrix1 = new Matrix(4, 6);
+        
         System.out.print("Enter number of rows: ");
-        matrix1.setNumberOfRows(input.nextInt());
+        int rows = input.nextInt();
         System.out.print("Enter number of columns: ");
-        matrix1.setNumberOfColumns(input.nextInt());
-        matrix1.createMatrix();
-
-        System.out.println(matrix1.toString());
-        matrix1.interchangeRows(0, 1);
+        int columns = input.nextInt();
+        Matrix matrix1 = new Matrix(rows, columns);
+        
+        matrix1.reduce();
         System.out.println(matrix1.toString());
 
         //double[][] matrix2 = computer.createMatrix();
