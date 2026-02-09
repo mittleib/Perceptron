@@ -1,9 +1,6 @@
 import java.util.Scanner;
 
 public class Matrix {
-    private final String RESET = "\u001B[0m";
-    private final String RED_BACKGROUND = "\u001B[41m";
-
     private int numberOfRows;
     private int numberOfColumns;
     private double[][] matrix;
@@ -109,12 +106,12 @@ public class Matrix {
             if (!matrixIsDone) {
                 // Step 2: Multiply row values by same coefficient to make "value" 1
                 if (value != 1 && value != 0) {
-                    double coefficient = 1 / value;
+                    double coefficient = 1.0 / value;
                     for (int columnCheck = column; columnCheck < numberOfColumns; columnCheck++) {
                         matrix[row][columnCheck] = matrix[row][columnCheck] * coefficient;
                     }
+                    matrix[row][column] = 1.0;
                 }
-
                 // Step 3: Make cooresponding values of other rows 0 around "value"
                 //         by subtracting multiples of this row's values to other rows' values
                 for (int rowCheck = 0; rowCheck < numberOfRows; rowCheck++) {
